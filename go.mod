@@ -1,3 +1,3 @@
-module github.com/electrofocus/telegram-auth-verifier
+module github.com/bborn2/telegram-auth-verifier
 
-go 1.15
+go 1.16

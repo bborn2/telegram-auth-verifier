@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"net/url"
 )
 
 // ErrInvalidCreds ...
@@ -15,12 +16,12 @@ var ErrInvalidCreds = errors.New("invalid telegram creds")
 // Credentials ...
 // Telegram Login credentials available for parsing from JSON.
 type Credentials struct {
-	ID        int    `json:"id"`
+	ID        int64  `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
 	PhotoURL  string `json:"photo_url"`
-	AuthDate  int    `json:"auth_date"`
+	AuthDate  int64  `json:"auth_date"`
 	Hash      string `json:"hash"`
 }
 
@@ -63,10 +64,14 @@ last_name=%s`,
 			c.LastName)
 	}
 
+	photoUrl, err := url.QueryUnescape(c.PhotoURL)
+	if err != nil {
+		photoUrl = c.PhotoURL
+	}
+
 	if c.PhotoURL != "" {
 		s += fmt.Sprintf(`
-photo_url=%s`,
-			c.PhotoURL)
+photo_url=%s`, photoUrl)
 	}
 
 	if c.Username != "" {
