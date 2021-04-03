@@ -1,3 +1,6 @@
+# what is this
+Fork form [here](https://github.com/electrofocus/telegram-auth-verifier) and fix some bugs
+
 # telegram-auth-verifier
 Golang package for [Telegram Website Login](https://core.telegram.org/widgets/login#checking-authorization) credentials verification. Check documentation [here](https://pkg.go.dev/github.com/electrofocus/telegram-auth-verifier).
 
@@ -5,7 +8,7 @@ Golang package for [Telegram Website Login](https://core.telegram.org/widgets/lo
 With a [correctly configured](https://golang.org/doc/install#testing) Go toolchain:
 
 ```
-go get github.com/electrofocus/telegram-auth-verifier
+go get github.com/bborn2/telegram-auth-verifier
 ```
 
 ## Example
@@ -16,24 +19,23 @@ Let's verify credentials:
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 
 	tgverifier "github.com/electrofocus/telegram-auth-verifier"
 )
 
 func main() {
 	token := []byte("Your Telegram Bot Token")
-
-	rawCreds := `{
-		"id": 111111111,
-		"first_name": "John",
-		"last_name": "Doe",
-		"username": "johndoe",
-		"auth_date": 1615974774,
-		"hash": "ae1b08443b7bb50295be3961084c106072798cb65e91995a1b49927cd4cc5b0c"
-	}`
-
-	creds := tgverifier.Credentials{}
-	json.Unmarshal([]byte(rawCreds), &creds)
+	
+	creds := tgverifier.Credentials{
+		ID:        111111111,
+		FirstName: "Kun",
+		LastName:  "Song",
+		Username:  "recoba",
+		PhotoURL:  "http://tg.me/xxx",
+		AuthDate:  1617443847,
+		Hash:      ”ae1b08443b7bb50295be3961084c106072798cb65e91995a1b49927cd4cc5b0c“,
+	}
 
 	if err := creds.Verify(token); err != nil {
 		fmt.Println("Credentials are not from Telegram")
