@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"reflect"
+	"sort"
 )
 
 // ErrInvalidCreds ...
@@ -46,41 +48,35 @@ func (c *Credentials) Verify(token []byte) error {
 // String ...
 // Builds credentials string, excluding hash field.
 func (c *Credentials) String() string {
-	s := fmt.Sprintf(`auth_date=%d`, c.AuthDate)
 
-	if c.FirstName != "" {
-		s += fmt.Sprintf(`
-first_name=%s`,
-			c.FirstName)
+	val := reflect.ValueOf(&c)
+	typ := reflect.TypeOf(&c)
+
+	// 存储 JSON 标签和对应的值
+	var kvPairs []string
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		jsonTag := field.Tag.Get("json")
+		if jsonTag != "" && jsonTag != "hash" {
+			fieldValue := val.Field(i).Interface()
+			kvPairs = append(kvPairs, fmt.Sprintf("%s=%v", jsonTag, url.QueryEscape(fmt.Sprintf("%v", fieldValue))))
+		}
 	}
 
-	s += fmt.Sprintf(`
-id=%d`,
-		c.ID)
+	// 对 JSON 标签进行排序
+	sort.Strings(kvPairs)
 
-	if c.LastName != "" {
-		s += fmt.Sprintf(`
-last_name=%s`,
-			c.LastName)
+	// 拼接成 k1=v1&k2=v2&... 的形式
+	result := ""
+	for i, kv := range kvPairs {
+		if i > 0 {
+			result += "&"
+		}
+		result += kv
 	}
 
-	photoUrl, err := url.QueryUnescape(c.PhotoURL)
-	if err != nil {
-		photoUrl = c.PhotoURL
-	}
+	return result
 
-	if c.PhotoURL != "" {
-		s += fmt.Sprintf(`
-photo_url=%s`, photoUrl)
-	}
-
-	if c.Username != "" {
-		s += fmt.Sprintf(`
-username=%s`,
-			c.Username)
-	}
-
-	return s
 }
 
 func computeHmac256(msg []byte, key []byte) []byte {
