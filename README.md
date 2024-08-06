@@ -1,5 +1,5 @@
 # what is this
-Fork form [here](https://github.com/electrofocus/telegram-auth-verifier) and fix some bugs
+Fork form [here](https://github.com/electrofocus/telegram-auth-verifier) and fix many bugs
 
 # telegram-auth-verifier
 Golang package for [Telegram Website Login](https://core.telegram.org/widgets/login#checking-authorization) credentials verification. Check documentation [here](https://pkg.go.dev/github.com/electrofocus/telegram-auth-verifier).
