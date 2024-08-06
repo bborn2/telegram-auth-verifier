@@ -30,6 +30,7 @@ type Credentials struct {
 // Verify ...
 // Checks if the credentials are from Telegram.
 // Returns nil error if credentials are from Telegram.
+// https://core.telegram.org/widgets/login
 func (c *Credentials) Verify(token []byte) error {
 	secret := sha256.Sum256(token)
 
@@ -49,8 +50,8 @@ func (c *Credentials) Verify(token []byte) error {
 // Builds credentials string, excluding hash field.
 func (c *Credentials) String() string {
 
-	val := reflect.ValueOf(&c)
-	typ := reflect.TypeOf(&c)
+	val := reflect.ValueOf(c).Elem()
+	typ := val.Type()
 
 	// 存储 JSON 标签和对应的值
 	var kvPairs []string
@@ -58,8 +59,13 @@ func (c *Credentials) String() string {
 		field := typ.Field(i)
 		jsonTag := field.Tag.Get("json")
 		if jsonTag != "" && jsonTag != "hash" {
-			fieldValue := val.Field(i).Interface()
-			kvPairs = append(kvPairs, fmt.Sprintf("%s=%v", jsonTag, url.QueryEscape(fmt.Sprintf("%v", fieldValue))))
+
+			v, err := url.QueryUnescape(fmt.Sprintf("%v", val.Field(i).Interface()))
+			if err != nil || v == "" {
+				continue
+			}
+
+			kvPairs = append(kvPairs, fmt.Sprintf("%s=%v", jsonTag, v))
 		}
 	}
 
@@ -70,13 +76,12 @@ func (c *Credentials) String() string {
 	result := ""
 	for i, kv := range kvPairs {
 		if i > 0 {
-			result += "&"
+			result += "\n"
 		}
 		result += kv
 	}
 
 	return result
-
 }
 
 func computeHmac256(msg []byte, key []byte) []byte {
